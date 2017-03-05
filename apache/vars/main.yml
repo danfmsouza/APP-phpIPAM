@@ -1,0 +1,6 @@
+---
+# vars file for apache
+ vars:
+     document_root: /var/www/html/phpipam 
+     mysqladdr: 192.168.122.2
+     dbhost: $db['host'] = 'localhost';

@@ -1,0 +1,25 @@
+---
+- hosts: Apache
+  vars:
+       mysqladdr: "'192.168.122.2'"
+       dbhost:  "'localhost'"
+       dbpass: "'phpipamadmin'"
+       dbnewpass: "'phpipam2017'"
+       casa: "/home/infnet"
+       phpipamdir: "/var/www/html/phpipam"
+       docroot: "/var/www/html"
+  user: infnet
+  become: yes
+  tasks:
+  - name: TESTE {{ dbhost }}
+    shell: "sed -e 's/{{ dbhost }}/{{ mysqladdr }}/g' {{ phpipamdir }}/config.dist.php |sed -e 's/{{ dbpass }}/{{ dbnewpass }}/g' >{{ casa }}/teste.log"
+
+  - name: TESTE2
+    lineinfile: dest={{ casa }}/teste1.log regexp='^\tDocumentRoot' line='\tDocumentRoot {{ phpipamdir }}'
+
+    notify: 
+      - restart apache2
+  
+  handlers:
+    - name: restart apache2
+      service: name=apache2 state=restarted

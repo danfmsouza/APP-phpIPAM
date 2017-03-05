@@ -1,0 +1,50 @@
+# Playbook Ansible automatizando servidor Apache
+---
+- hosts: Apache
+  user: infnet
+  become: yes
+
+  vars:
+       mysqladdr: '192.168.122.2'
+       dbhost:  "'localhost'"
+       dbpass: "'phpipamadmin'"
+       dbnewpass: "'phpipam2017'"
+       siteconf: "/etc/apache2/sites-available/000-default.conf"
+       phpipamdir: "/var/www/html/phpipam"
+
+  tasks:
+  - name: Atualizando o cache de repositórios APT
+    action: apt update_cache=yes
+
+  - name: Atualização do sistema
+    action: apt upgrade=full
+
+  - name: Instala o servidor apache e as dependências do phpIPAM
+    apt: name={{ item }} state=present
+    with_items:
+    - apache2
+    - mysql-client
+    - php
+    - php-gmp 
+    - php-pear 
+    - php-mysql 
+    - php-ldap
+    - php-mbstring
+    - libapache2-mod-php
+# Instalação phpIPAM 
+  - name: Clonando arquivos do phpIPAM
+    git: repo='https://github.com/phpipam/phpipam.git' dest={{ phpipamdir }} accept_hostkey=yes update=no
+    ignore_errors: true
+
+  - name: Criando arquivo de configuração config.php
+    shell: "sed -e 's/{{ dbhost }}/{{ mysqladdr }}/g' {{ phpipamdir }}/config.dist.php |sed -e 's/{{ dbpass }}/{{ dbnewpass }}/g' >{{ phpipamdir }}/config.php"
+
+  - name: Configurando Apache DocumentRoot
+    lineinfile: dest={{ siteconf }} regexp='^\tDocumentRoot' line="\tDocumentRoot /var/www/html/phpipam"
+   
+    notify: 
+      - restart apache2
+  - name: Reiniciando Apache
+    service: name=apache2 state=restarted 
+  - name: Exportando Schema do Banco de dados phpipam para servidor MySQL
+    mysql_db: name=phpipam state=import target={{ phpipamdir }}/db/SCHEMA.sql login_host={{ mysqladdr }} login_user=phpipam login_password=phpipam2017

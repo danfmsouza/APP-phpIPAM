@@ -1,0 +1,23 @@
+---
+- hosts: MySQL
+  user: infnet
+  become: yes
+  tasks:
+  - name: Atualizando o cache de repositórios APT
+    action: apt update_cache=yes
+
+  - name: Atualização do sistema
+    action: apt upgrade=full
+
+  - name: Instala o servidor MySQL
+    apt: name={{ item }} state=present
+    with_items:
+    - mysql-server
+    - python-software-properties
+    - python-mysqldb
+
+  - name: Criando banco de dados phpipam
+    mysql_db: name=phpipam state=present login_user=root login_password=MySQL211!
+
+  - name: Criando usuário phpipam
+    mysql_user: name=phpipam password=phpipam2017 priv='*.*:ALL,GRANT' state=present login_user=root login_password=MySQL211! host=192.168.122.3
