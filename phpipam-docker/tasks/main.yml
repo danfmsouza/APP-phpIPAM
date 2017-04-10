@@ -1,0 +1,9 @@
+---
+- name: Executa o container phpIPAM
+  docker_container:
+     name: phpIPAM
+     image: "michaelholttech/phpipam"
+     links:
+      - "ipamDB:mysql"
+     ports:
+      - 80:80

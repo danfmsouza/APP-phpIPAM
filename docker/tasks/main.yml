@@ -1,0 +1,60 @@
+---
+- name: Instalando Dependências do Docker
+  apt: 
+      name={{ item }} 
+      update_cache=yes
+  with_items: 
+      - python-dev
+      - python-setuptools
+      - python-software-properties
+
+- name: Instalando o PIP via easy_install
+  easy_install: 
+      name=pip 
+
+- name: Instalando o módulo docker-py
+  pip: 
+      name=docker-py 
+      state=present
+
+- name: Adicionando Repositório APT para o Docker
+  apt_repository:
+      repo='deb https://apt.dockerproject.org/repo ubuntu-{{ ansible_distribution_release }} main'
+      state=present
+
+- name: Importando Chave do Repositório Docker Project
+  apt_key:
+      url=https://apt.dockerproject.org/gpg
+      state=present
+      id=2C52609D
+
+- name: Instalando Pacote Docker
+  apt:
+      name=docker-engine
+      update_cache=yes
+
+- name: Criando grupo de Usuários Docker
+  group: 
+      name=docker 
+      state=present
+
+- name: Adicionando usuarios ao grupo Docker
+  user: 
+      name={{ item }} 
+      group=docker 
+      state=present
+  with_items: 
+    - noc
+  when: noc is defined
+
+- name: Configurando o Docker
+  template: 
+      src=default_docker.j2 
+      dest=/etc/default/docker 
+      mode=0644 
+      owner=root 
+      group=root
+
+  notify: Reiniciando o Docker
+
+

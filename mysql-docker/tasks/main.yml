@@ -1,0 +1,7 @@
+---
+- name: Executa o container ipamDB
+  docker_container:
+     name: "ipamDB"
+     image: "mysql:5.6"
+     env:
+       MYSQL_ROOT_PASSWORD: phpIPAM2017

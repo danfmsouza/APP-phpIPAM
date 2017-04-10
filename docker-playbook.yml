@@ -1,0 +1,22 @@
+---
+- name: Instalando Docker e suas dependencias
+  hosts: docker
+  remote_user: noc
+  become: yes
+  roles:
+  - docker
+
+- name: Rodando Conteiner ipamDB
+  hosts: docker
+  remote_user: noc
+  become: yes
+  roles:
+  - mysql-docker
+
+- name: Rodando Conteiner phpIPAM
+  hosts: docker
+  remote_user: noc
+  become: yes
+  roles:
+  - phpipam-docker
+

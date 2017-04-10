@@ -1,0 +1,3 @@
+---
+- name: Reiniciando o Docker
+  service: name=docker state=restarted
